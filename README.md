@@ -1,19 +1,23 @@
 CSV TO DB
 =====
 
-### Quick Start
+# Quick Start
 
-Create Mysql container :
+### Create Mysql container
 
 ` docker-compose.yml up -d `
 
-Build the application :
+### Build the application
 
 ` go build `
 
-Run the application
+### Run the application
 
 `./csv-to-db  -db-username=root -db-password=password -db-address=localhost -db-name=dbtest -db-table=values --buffer-sql=1000 --file static/data.csv`
+
+### View results
+
+`docker-compose exec mysql mysql -u root -p -e 'SELECT COUNT(*) FROM values' dbtest `
 
 Parameters :
 
