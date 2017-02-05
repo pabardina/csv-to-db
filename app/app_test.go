@@ -1,63 +1,61 @@
-package app_test
+package app
 
 import (
 	"database/sql"
-	"os"
-
-	. "github.com/pabardina/csv-to-db/app"
-
 	"fmt"
+	"testing"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var _ = Describe("App", func() {
+func TestAllTheWorkflow(t *testing.T) {
+	t.Log("Test the application (expected values in db)")
+	db, _ := sql.Open("sqlite3", "./test.db")
+	defer db.Close()
 
-	var dbWriter *DatabaseWriter
-	var err error
-	var db *sql.DB
-	var csvPath string
+	csvPath := "../static/data.csv"
 
-	Context("When the application is launched", func() {
+	dbWriter := &DatabaseWriter{
+		DB:     db,
+		Buffer: 200,
+		Table:  "test",
+	}
 
-		BeforeSuite(func() {
-			db, _ = sql.Open("sqlite3", "./test.db")
-			csvPath = "../static/data.csv"
-			dbWriter = &DatabaseWriter{
-				DB:     db,
-				Buffer: 300,
-				Table:  "test",
-			}
-		})
+	if err := dbWriter.CreateDBTable(); err != nil {
+		t.Errorf("Excepted no error, but : %s", err)
+	}
 
-		It("Should init the database without error", func() {
-			err = dbWriter.CreateDBTable()
-			Expect(err).To(BeNil())
-		})
+	if err := ParseCSV(csvPath, dbWriter); err != nil {
+		t.Errorf("Excepted no error, but : %s", err)
+	}
 
-		It("Should successfully parse the CSV file", func() {
-			err = ParseCSV(csvPath, dbWriter)
-			Expect(err).To(BeNil())
+	results, _ := dbWriter.DB.Query(fmt.Sprintf("Select count(*) from %s", dbWriter.Table))
+	count := 0
+	for results.Next() {
+		_ = results.Scan(&count)
+	}
 
-		})
+	fmt.Print(count)
 
-		It("Should have inserted data in the database", func() {
-			results, _ := dbWriter.DB.Query(fmt.Sprintf("Select count(*) from %s", dbWriter.Table))
-			count := 0
-			for results.Next() {
-				_ = results.Scan(&count)
-			}
-			Expect(count).NotTo(Equal(0))
+	if count == 0 {
+		t.Error("Excepted to have values in database, but it's empty")
+	}
 
-		})
+	os.Remove("./test.db")
 
-		AfterSuite(func() {
-			os.Remove("./test.db")
-		})
+}
 
-	})
+func TestGetRecordReturnValStruct(t *testing.T) {
+	data := []string{"2015-01-01", "212.23"}
+	valStruct := GetRecordReturnValStruct(data)
 
-})
+	if valStruct.Date == "" {
+		t.Error("Excepted to have a date in struct")
+	}
+
+	if valStruct.Number == 0 {
+		t.Error("Excepted to have a number in struct")
+	}
+}

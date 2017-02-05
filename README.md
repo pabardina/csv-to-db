@@ -13,7 +13,7 @@ CSV TO DB
 
 ### Run the application
 
-`./csv-to-db  -db-username=root -db-password=password -db-address=localhost -db-name=dbtest -db-table=values --buffer-sql=1000 --file static/data.csv`
+`./csv-to-db  -db-username=root -db-password=password -db-address=localhost -db-name=dbtest -db-table=data --buffer-sql=1000 --file static/data.csv`
 
 ### View results
 

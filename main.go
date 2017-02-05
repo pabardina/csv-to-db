@@ -52,7 +52,7 @@ func main() {
 		app.ExitWithError(err)
 	}
 
-	fmt.Printf("%d inserted", app.InsertedValues)
+	fmt.Println("All data inserted")
 }
 
 var config struct {

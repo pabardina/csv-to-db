@@ -6,13 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
-	"sync"
 )
-
-var InsertedValues int64
-var allInsertsDone = sync.WaitGroup{}
 
 type DatabaseWriter struct {
 	Buffer int
@@ -28,6 +23,10 @@ type ValueStruct struct {
 type ValueStructWriter interface {
 	Write(values []ValueStruct) error
 	GetBufferSQL() int
+}
+
+func (d *DatabaseWriter) GetBufferSQL() int {
+	return d.Buffer
 }
 
 func (d *DatabaseWriter) CreateDBTable() error {
@@ -47,13 +46,7 @@ func (d *DatabaseWriter) CreateDBTable() error {
 	return nil
 }
 
-func (d *DatabaseWriter) GetBufferSQL() int {
-	return d.Buffer
-}
-
 func (d *DatabaseWriter) Write(values []ValueStruct) error {
-	allInsertsDone.Add(1)
-	defer allInsertsDone.Add(-1)
 	sqlString := fmt.Sprintf("INSERT INTO %s(date, number) VALUES ", d.Table)
 	data := []interface{}{}
 
@@ -68,16 +61,11 @@ func (d *DatabaseWriter) Write(values []ValueStruct) error {
 		return err
 	}
 
-	results, err := query.Exec(data...)
+	_, err = query.Exec(data...)
 	if err != nil {
 		return err
 	}
 
-	newEntries, err := results.RowsAffected()
-	if err != nil {
-		return err
-	}
-	InsertedValues += newEntries
 	return nil
 }
 
@@ -117,16 +105,8 @@ func ParseCSV(csvPath string, v ValueStructWriter) error {
 			return err
 		}
 
-		number, err := strconv.ParseFloat(record[1], 64)
+		val := GetRecordReturnValStruct(record)
 
-		if err != nil {
-			return err
-		}
-
-		val := ValueStruct{
-			Date:   record[0],
-			Number: number,
-		}
 		values = append(values, val)
 
 		if len(values) > bufferSQL {
@@ -142,5 +122,6 @@ func ParseCSV(csvPath string, v ValueStructWriter) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
