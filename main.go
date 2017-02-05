@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/pabardina/csv-to-db/app"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func init() {

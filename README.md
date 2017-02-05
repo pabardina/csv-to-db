@@ -11,7 +11,7 @@ CSV TO DB
 
 ` go build `
 
-### Run the application
+### Run the application when mysql's container is ready
 
 `./csv-to-db  -db-username=root -db-password=password -db-address=localhost -db-name=dbtest -db-table=data --buffer-sql=1000 --file static/data.csv`
 
@@ -19,7 +19,12 @@ CSV TO DB
 
 `docker-compose exec mysql mysql -u root -p -e 'SELECT COUNT(*) FROM data' dbtest `
 
-Parameters :
+
+### Launch tests
+
+` go test -v ./... `
+
+### Parameters :
 
 ```
   -buffer-sql int
