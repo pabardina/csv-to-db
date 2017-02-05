@@ -17,7 +17,7 @@ CSV TO DB
 
 ### View results
 
-`docker-compose exec mysql mysql -u root -p -e 'SELECT COUNT(*) FROM values' dbtest `
+`docker-compose exec mysql mysql -u root -p -e 'SELECT COUNT(*) FROM data' dbtest `
 
 Parameters :
 
